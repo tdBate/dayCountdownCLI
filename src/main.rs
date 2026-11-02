@@ -29,6 +29,8 @@ fn main() {
     items.add_item(item.clone());
     items.add_item(item.clone());
 
+    items.delete_item(0);
+
     for a in items.data {
         a.print_state();
     }
@@ -39,6 +41,11 @@ impl Items {
         item.id = self.next_id;
         self.next_id += 1;
         self.data.push(item);
+    }
+
+    fn delete_item(&mut self, id: u32) -> Option<CountdownItem> {
+        let index = self.data.iter().position(|item| item.id == id)?;
+        Some(self.data.remove(index))
     }
 }
 
