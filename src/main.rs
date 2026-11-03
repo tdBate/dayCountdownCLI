@@ -1,3 +1,5 @@
+use std::io::{self, Write};
+
 use chrono::{Local, NaiveDate};
 
 struct Items {
@@ -34,6 +36,40 @@ fn main() {
     for a in items.data {
         a.print_state();
     }
+
+    propmt_item();
+}
+
+fn propmt_item() {
+    print!("Enter title: ");
+    io::stdout().flush().unwrap();
+    let mut title = String::new();
+    io::stdin()
+        .read_line(&mut title)
+        .expect("failed to readline");
+    println!("");
+
+    let mut date_string: String = String::from("");
+    print!("Enter date: ");
+    io::stdout().flush().unwrap();
+    io::stdin()
+        .read_line(&mut date_string)
+        .expect("failed to readline");
+    println!("");
+
+    let date = match NaiveDate::parse_from_str(&date_string.trim(), "%Y-%m-%d") {
+        Ok(a) => a,
+        Err(e) => {
+            println!("Error{}", e);
+            return;
+        }
+    };
+
+    let instance = CountdownItem {
+        id: 0,
+        title: title.trim().to_string(),
+        date: date,
+    };
 }
 
 impl Items {
