@@ -28,19 +28,18 @@ fn main() {
         date: date.clone(),
     };
 
+    items.add_item(propmt_item());
     items.add_item(item.clone());
     items.add_item(item.clone());
 
-    items.delete_item(0);
+    //items.delete_item(0);
 
     for a in items.data {
         a.print_state();
     }
-
-    propmt_item();
 }
 
-fn propmt_item() {
+fn propmt_item() -> CountdownItem {
     print!("Enter title: ");
     io::stdout().flush().unwrap();
     let mut title = String::new();
@@ -49,27 +48,29 @@ fn propmt_item() {
         .expect("failed to readline");
     println!("");
 
-    let mut date_string: String = String::from("");
-    print!("Enter date: ");
-    io::stdout().flush().unwrap();
-    io::stdin()
-        .read_line(&mut date_string)
-        .expect("failed to readline");
-    println!("");
+    let date = loop {
+        let mut date_string: String = String::from("");
+        print!("Enter date: ");
+        io::stdout().flush().unwrap();
+        io::stdin()
+            .read_line(&mut date_string)
+            .expect("failed to readline");
+        println!("");
 
-    let date = match NaiveDate::parse_from_str(&date_string.trim(), "%Y-%m-%d") {
-        Ok(a) => a,
-        Err(e) => {
-            println!("Error{}", e);
-            return;
-        }
+        match NaiveDate::parse_from_str(&date_string.trim(), "%Y-%m-%d") {
+            Ok(a) => break a,
+            Err(e) => {
+                println!("Wrong format try: (YYYY-MM-DD)");
+                continue;
+            }
+        };
     };
 
-    let instance = CountdownItem {
+    CountdownItem {
         id: 0,
         title: title.trim().to_string(),
         date: date,
-    };
+    }
 }
 
 impl Items {
