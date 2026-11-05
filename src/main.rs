@@ -1,7 +1,13 @@
+use chrono::{Local, NaiveDate};
+use clap::Parser;
 use std::io::{self, Write};
 
-use chrono::{Local, NaiveDate};
-
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short, long)]
+    command: String,
+}
 struct Items {
     data: Vec<CountdownItem>,
     next_id: u32,
@@ -15,6 +21,10 @@ struct CountdownItem {
 }
 
 fn main() {
+    let args = Args::parse();
+    println!("{}", args.command);
+
+    //test stuff
     let date = NaiveDate::parse_from_str("2026-12-28", "%Y-%m-%d").unwrap();
 
     let mut items: Items = Items {
