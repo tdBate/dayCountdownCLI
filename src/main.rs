@@ -1,6 +1,17 @@
 use chrono::{Local, NaiveDate};
 use clap::{Parser, Subcommand};
-use std::io::{self, Write};
+use serde::{Deserialize, Serialize};
+use std::{
+    fs,
+    io::{self, Write},
+    path::{Path, PathBuf},
+    sync::LazyLock,
+};
+
+static FILE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    let save_dir = Path::new("data");
+    save_dir.join("data.json")
+});
 
 #[derive(Parser, Debug)]
 #[command(version, about = "A date countdown cli app")]
@@ -18,12 +29,13 @@ enum Commands {
     Add {},
 }
 
+#[derive(Serialize, Deserialize)]
 struct Items {
     data: Vec<CountdownItem>,
     next_id: u32,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 struct CountdownItem {
     id: u32,
     title: String,
@@ -31,25 +43,11 @@ struct CountdownItem {
 }
 
 fn main() {
-    //test stuff
-    let date = NaiveDate::parse_from_str("2026-12-28", "%Y-%m-%d").unwrap();
-
-    let mut items: Items = Items {
-        data: vec![],
+    let file_content = fs::read_to_string(&*FILE_PATH).unwrap();
+    let mut items = Items {
+        data: serde_json::from_str(file_content.as_str()).unwrap(),
         next_id: 0,
     };
-
-    let item = CountdownItem {
-        id: 0,
-        title: String::from("asd"),
-        date: date.clone(),
-    };
-
-    //items.add_item(propmt_item());
-    //items.add_item(item.clone());
-    //items.add_item(item.clone());
-
-    //items.delete_item(0);
 
     let cli = Cli::parse();
 
@@ -61,6 +59,7 @@ fn main() {
         }
         Commands::Add {} => {
             items.add_item(propmt_item());
+            items.save();
         }
     }
 }
@@ -109,6 +108,13 @@ impl Items {
     fn delete_item(&mut self, id: u32) -> Option<CountdownItem> {
         let index = self.data.iter().position(|item| item.id == id)?;
         Some(self.data.remove(index))
+    }
+
+    fn save(&mut self) {
+        fs::write(
+            &*FILE_PATH,
+            serde_json::to_string_pretty(&self.data).unwrap(),
+        );
     }
 }
 
