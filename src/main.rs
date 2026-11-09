@@ -1,13 +1,23 @@
 use chrono::{Local, NaiveDate};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::io::{self, Write};
 
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    #[arg(short, long)]
-    command: String,
+#[command(version, about = "A date countdown cli app")]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
 }
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    ///shows all the recorded countdown items
+    Show {},
+
+    ///adds an item
+    Add {},
+}
+
 struct Items {
     data: Vec<CountdownItem>,
     next_id: u32,
@@ -21,9 +31,6 @@ struct CountdownItem {
 }
 
 fn main() {
-    let args = Args::parse();
-    println!("{}", args.command);
-
     //test stuff
     let date = NaiveDate::parse_from_str("2026-12-28", "%Y-%m-%d").unwrap();
 
@@ -38,14 +45,23 @@ fn main() {
         date: date.clone(),
     };
 
-    items.add_item(propmt_item());
-    items.add_item(item.clone());
-    items.add_item(item.clone());
+    //items.add_item(propmt_item());
+    //items.add_item(item.clone());
+    //items.add_item(item.clone());
 
     //items.delete_item(0);
 
-    for a in items.data {
-        a.print_state();
+    let cli = Cli::parse();
+
+    match &cli.command {
+        Commands::Show {} => {
+            for a in items.data {
+                a.print_state();
+            }
+        }
+        Commands::Add {} => {
+            items.add_item(propmt_item());
+        }
     }
 }
 
