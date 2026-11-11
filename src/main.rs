@@ -53,9 +53,7 @@ fn main() {
 
     match &cli.command {
         Commands::Show {} => {
-            for a in items.data {
-                a.print_state();
-            }
+            items.print_data();
         }
         Commands::Add {} => {
             items.add_item(propmt_item());
@@ -110,11 +108,18 @@ impl Items {
         Some(self.data.remove(index))
     }
 
-    fn save(&mut self) {
+    fn save(&self) {
         fs::write(
             &*FILE_PATH,
             serde_json::to_string_pretty(&self.data).unwrap(),
         );
+    }
+
+    fn print_data(&self) {
+        println!("Data:");
+        self.data
+            .iter()
+            .for_each(|item| println!("  {}", item.to_string()));
     }
 }
 
@@ -127,5 +132,9 @@ impl CountdownItem {
 
     fn print_state(&self) {
         println!("{}-{} , {}", self.title, self.id, self.get_day_from_now());
+    }
+
+    fn to_string(&self) -> String {
+        String::from(format!("{} {}", self.title, self.get_day_from_now()))
     }
 }
